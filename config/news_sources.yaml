@@ -1,0 +1,29 @@
+﻿news_sources:
+  google_news:
+    description: "Google News RSS - 해외 K-콘텐츠 트렌드"
+    feeds:
+      - url: "https://news.google.com/rss/search?q=K-drama&hl=en&gl=US&ceid=US:en"
+        name: "K-Drama News (Global)"
+      - url: "https://news.google.com/rss/search?q=Kpop&hl=en&gl=US&ceid=US:en"
+        name: "K-Pop News (Global)"
+      - url: "https://news.google.com/rss/search?q=Korean+entertainment&hl=en&gl=US&ceid=US:en"
+        name: "Korean Entertainment (Global)"
+      - url: "https://news.google.com/rss/search?q=Hallyu+content&hl=en&gl=US&ceid=US:en"
+        name: "Hallyu Trends (Global)"
+
+  korean_media:
+    description: "한국 주요 언론사 - K-콘텐츠 섹션"
+    feeds:
+      - url: "https://rss.news1.co.kr/rss.xml?sectionId=105"
+        name: "News1 - 연예"
+      - url: "https://www.soompi.com/feed/"
+        name: "Soompi - K-Drama News"
+      - url: "https://www.allkpop.com/rss/feed.xml"
+        name: "AllKpop - K-Pop News"
+
+collection_settings:
+  items_per_week: 10
+  languages: 
+    - english
+    - korean
+  max_age_days: 7
