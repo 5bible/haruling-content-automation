@@ -1,4 +1,4 @@
-﻿news_sources:
+news_sources:
   google_news:
     description: "Google News RSS - 해외 K-콘텐츠 트렌드"
     feeds:
@@ -21,9 +21,10 @@
       - url: "https://www.allkpop.com/rss/feed.xml"
         name: "AllKpop - K-Pop News"
 
+# collect-news/SKILL.md에서 아래 설정값을 참조합니다.
 collection_settings:
-  items_per_week: 10
-  languages: 
+  items_per_week: 10   # 최대 수집 기사 수 (SKILL.md items_per_week 참조)
+  max_age_days: 7      # 수집 기준 기간 (SKILL.md max_age_days 참조)
+  languages:           # 수집 대상 언어 (영문/한국어 피드 모두 수집)
     - english
     - korean
-  max_age_days: 7

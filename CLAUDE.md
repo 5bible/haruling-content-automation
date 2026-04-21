@@ -1,136 +1,77 @@
-﻿# HaruLing Content Automation - Claude Automation Guide
+# HaruLing Content Automation - Claude 오케스트레이터
 
 ## 📊 프로젝트 개요
+HaruLing 한국어 학습 서비스를 위한 K-콘텐츠 주간 뉴스 자동화 시스템
 
-HaruLing 한국어 학습 서비스를 위한 K-콘텐츠 뉴스 자동화 시스템입니다.
-
-**목표**: 매주 K-콘텐츠(드라마, 가요, 아이돌) 뉴스를 수집 → 분석 → Obsidian에 저장
-
----
-
-## 🤖 Claude의 자동화 작업 (매주 월요일 10시 UTC)
-
-### Step 1: RSS 뉴스 수집
-**할 일**: config/news_sources.yaml의 모든 RSS 피드에서 뉴스 수집
-
-**피드 위치**: 
-\\\
-config/news_sources.yaml
-  - google_news: K-drama, K-pop, Korean entertainment, Hallyu
-  - korean_media: News1, Soompi, AllKpop
-\\\
-
-**요구사항**:
-- 지난 7일간의 뉴스만 수집
-- 최대 10개 기사
-- 중복 제거
-- 필수 정보: title, source, link, published, summary
-
-**결과**: 뉴스 기사 리스트 (JSON 형식)
-
----
-
-### Step 2: Google Gemini로 분석
-**할 일**: 수집된 뉴스를 분석하여 주간 보고서 생성
-
-**프롬프트**: config/prompts.yaml 참고 (또는 아래 기본 프롬프트 사용)
-
-**분석 지시**:
-당신은 K-콘텐츠 마케팅 전문가입니다. 다음 뉴스를 분석해주세요:
-
-1. **트렌드 핵심 요약** (3-5줄)
-2. **카테고리별 분석**
-   - 드라마/영화
-   - 가요/뮤직
-   - 아이돌/엔터테인먼트
-3. **외국인 학습자 관점**: 언어/문화 학습 포인트
-4. **HaruLing 콘텐츠 아이디어** (3-5가지)
-
-**결과**: Markdown 형식의 주간 보고서
-
----
-
-### Step 3: Obsidian에 저장
-**할 일**: Desktop Commander를 통해 Obsidian vault에 파일 저장
-
-**저장 경로** (Windows):
-\\\
-C:\Users\user\Documents\Obsidian Vault\40. HaruLing\3.뉴스콘텐츠\
-\\\
-
-**파일명**:
-\\\
-Week {week_number} - K-Content Trends [{year}].md
-예: Week 14 - K-Content Trends [2026].md
-\\\
-
-**파일 형식**: Markdown (.md)
-
----
-
-## 🔧 환경 설정
-
-### .env 파일
-\\\.env
-GOOGLE_API_KEY=your_api_key_here
-OBSIDIAN_VAULT_PATH=C:\Users\user\Documents\Obsidian Vault\40. HaruLing\3.뉴스콘텐츠
-\\\
-
-### 필수 환경변수
-- \GOOGLE_API_KEY\: Google Gemini API 키
-- \OBSIDIAN_VAULT_PATH\: Windows Obsidian vault 경로
-
----
-
-## 📅 자동화 스케줄
-
-**실행**: 매주 월요일 10시 UTC (또는 필요시 수동 실행)
+**역할 분리**
+- 이 파일(CLAUDE.md) : 전체 흐름 조율 — 무엇을, 어떤 순서로
+- skills/ 폴더      : 각 단계의 구체적 실행 방법
 
 ---
 
 ## 🔄 전체 워크플로우
 
-\\\
-[매주 월요일 10시 UTC]
+```
+[실행 트리거: "HaruLing 주간 보고서 생성해줘"]
   ↓
-1. RSS 피드에서 뉴스 수집 (10개)
+Step 1: 뉴스 수집
+  - read_file("skills/collect-news/SKILL.md") 로 지시사항 읽기
+  - 지시에 따라 RSS 수집 실행
+  - 결과(JSON)를 컨텍스트에 보관
   ↓
-2. Google Gemini API로 분석
+Step 2: 분석 및 보고서 작성
+  - read_file("skills/analyze-content/SKILL.md") 로 지시사항 읽기
+  - Step 1의 JSON 결과를 그대로 사용하여 보고서 작성
+  - 완성된 Markdown을 컨텍스트에 보관
   ↓
-3. Markdown 보고서 생성
+Step 3: Obsidian 저장
+  - read_file("skills/save-to-obsidian/SKILL.md") 로 지시사항 읽기
+  - Step 2의 Markdown을 지정 경로에 저장
   ↓
-4. Desktop Commander로 Obsidian에 저장
-  ↓
-[완료 및 알림]
-\\\
+[완료: 저장된 파일 경로를 사용자에게 보고]
+```
 
 ---
 
-## 📁 설정 파일 구조
+## 📦 스킬 간 데이터 전달 방식
 
-### config/news_sources.yaml
-- google_news: 4개 RSS 피드
-- korean_media: 3개 RSS 피드
+각 스킬의 결과는 별도 파일 저장 없이 **Claude 컨텍스트(대화 메모리)에서 직접 전달**됩니다.
 
-### config/prompts.yaml
-- 분석용 프롬프트 템플릿
-
----
-
-## 🔍 주의사항
-
-1. **API 키 보안**: .env 파일은 GitHub에 올리지 않음 (.gitignore 적용)
-2. **Obsidian 경로**: Windows 환경 경로 반드시 확인
-3. **네트워크**: Google Gemini API 호출 필요
-4. **인코딩**: 모든 파일 UTF-8 인코딩
+- Step 1 → Step 2 : 수집된 기사 JSON 목록을 컨텍스트에 유지
+- Step 2 → Step 3 : 완성된 Markdown 보고서 전문을 컨텍스트에 유지
+- 중간 임시 파일 생성 불필요
 
 ---
 
-## ✅ 작업 완료 체크리스트
+## 📋 스킬 파일 경로
 
-- [ ] RSS 뉴스 10개 수집
-- [ ] Google Gemini로 분석 완료
-- [ ] Markdown 보고서 생성
-- [ ] Obsidian에 파일 저장됨
-- [ ] 파일명이 Week {N} - K-Content Trends [{year}].md 형식
-- [ ] Obsidian에서 파일 자동 인식됨
+| 스킬 | 파일 경로 |
+|------|-----------|
+| 뉴스 수집 | skills/collect-news/SKILL.md |
+| 분석 및 작성 | skills/analyze-content/SKILL.md |
+| Obsidian 저장 | skills/save-to-obsidian/SKILL.md |
+
+---
+
+## ⚙️ 환경 설정
+
+- Obsidian 저장 경로: `C:\Users\user\Documents\Obsidian Vault\40. HaruLing\3.뉴스콘텐츠\`
+- 파일명 형식: `Week {N} - K-Content Trends [{year}].md`
+- 인코딩: UTF-8
+
+---
+
+## ✅ 완료 조건
+
+- [ ] RSS 피드에서 뉴스 수집 완료 (최대 10개)
+- [ ] 주간 보고서 Markdown 작성 완료 (Week 번호 포함)
+- [ ] Obsidian vault에 파일 저장 완료
+- [ ] 사용자에게 저장 경로 및 파일명 보고
+
+---
+
+## 🚨 저장 단계 필수 주의사항
+
+Step 3 실행 시, 보고서를 채팅창에 출력하는 것으로 완료하지 않습니다.
+반드시 Desktop Commander write_file 도구를 직접 호출하여 Obsidian에 파일을 저장해야 합니다.
+도구 호출 성공 응답을 받은 후에만 완료로 간주합니다.
