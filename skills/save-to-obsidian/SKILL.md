@@ -4,12 +4,9 @@
 analyze-content에서 완성된 Markdown 보고서를 Obsidian vault에 저장합니다.
 CLAUDE.md의 Step 3에서 read_file로 이 파일을 읽은 후 실행됩니다.
 
----
-
 ## ⚡ 핵심 원칙
-**보고서를 채팅창에 출력하거나 보여주는 것으로 이 단계를 완료하지 않습니다.**
-반드시 아래 절차대로 Desktop Commander write_file 도구를 직접 호출하여 파일을 저장해야 합니다.
-저장이 완료된 후에만 완료로 간주합니다.
+보고서를 채팅창에 출력하거나 보여주는 것으로 이 단계를 완료하지 않습니다.
+반드시 PowerShell 도구를 호출하여 파일을 실제로 저장해야 완료입니다.
 
 ---
 
@@ -19,43 +16,42 @@ CLAUDE.md의 Step 3에서 read_file로 이 파일을 읽은 후 실행됩니다.
 
 ---
 
-## 📋 실행 절차 (반드시 순서대로 도구 호출)
+## 📋 실행 절차
 
 ### 1단계: 파일명 결정
 analyze-content 보고서의 title 프론트매터 값을 파일명으로 사용합니다.
 - 형식: `Week {N} - K-Content Trends [{year}].md`
 - 예시: `Week 17 - K-Content Trends [2026].md`
-- 주차 번호는 analyze-content에서 이미 계산 완료 — 재계산 불필요
 
-### 2단계: 저장 전체 경로 조합
+### 2단계: 저장 경로
 ```
-C:\Users\user\Documents\Obsidian Vault\40. HaruLing\3.뉴스콘텐츠\Week {N} - K-Content Trends [{year}].md
+C:\Users\user\Documents\Obsidian Vault\40. HaruLing\3.뉴스콘텐츠\
 ```
 
-### 3단계: 파일 존재 여부 확인 (도구 호출)
-Desktop Commander get_file_info 도구를 호출하여 위 전체 경로를 확인합니다.
-- 파일 없음 → 4단계로 바로 진행
-- 파일 있음 → 사용자에게 덮어쓰기 여부를 묻고 승인 후 4단계 진행
+### 3단계: 파일 저장 (PowerShell 도구 호출 — 필수)
+Windows-MCP PowerShell 도구를 아래 형식으로 즉시 호출합니다:
 
-### 4단계: 파일 저장 (도구 호출 — 필수)
-Desktop Commander write_file 도구를 아래 인자로 즉시 호출합니다:
-- path : `C:\Users\user\Documents\Obsidian Vault\40. HaruLing\3.뉴스콘텐츠\Week {N} - K-Content Trends [{year}].md`
-- content : analyze-content 보고서 전문 (Markdown 그대로)
-- mode : rewrite
+```powershell
+$content = @'
+(보고서 Markdown 전문을 여기에 그대로 삽입)
+'@
+$path = "C:\Users\user\Documents\Obsidian Vault\40. HaruLing\3.뉴스콘텐츠\Week {N} - K-Content Trends [{year}].md"
+[System.IO.File]::WriteAllText($path, $content, [System.Text.Encoding]::UTF8)
+Write-Host "저장 완료: $path"
+Test-Path $path
+```
 
-이 도구 호출 없이 이 단계를 완료로 처리하면 안 됩니다.
+Desktop Commander write_file 대신 반드시 PowerShell을 사용합니다.
+Desktop Commander는 타임아웃이 발생할 수 있어 사용하지 않습니다.
 
-### 5단계: 완료 보고
-write_file 호출이 성공한 후, 사용자에게 아래 정보를 출력합니다:
-- ✅ 저장 완료 메시지
-- 저장된 파일 전체 경로
-- 파일명
-- 수집 기사 수 및 주차 정보
+### 4단계: 완료 보고
+PowerShell 실행 결과가 True이면 성공입니다.
+사용자에게 저장된 파일 전체 경로와 파일명을 보고합니다.
 
 ---
 
 ## ⚠️ 주의사항
-- 저장 전에 보고서를 채팅창에 출력하지 않습니다 (요청 시에만 출력)
-- 저장 경로가 존재하지 않을 경우 오류 메시지 출력 (경로 자동 생성 금지)
-- 덮어쓰기는 반드시 사용자 확인 후 진행
-- 인코딩: UTF-8
+- Desktop Commander write_file 사용 금지 (타임아웃 발생)
+- PowerShell [System.IO.File]::WriteAllText 사용 (UTF-8 인코딩 보장)
+- 저장 후 Test-Path로 파일 존재 확인 필수
+- 저장 경로가 없을 경우 오류 메시지 출력 (경로 자동 생성 금지)
